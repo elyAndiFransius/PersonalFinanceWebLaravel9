@@ -19,6 +19,8 @@ use App\Http\Controllers\API\AuthController;
 // Mengarahkan register Path AuthController
 Route::post('register', [AuthController::class, 'register']);
 
+Route::post('/validationKodeOTP', [AuthController::class, 'validationKodeOTP']);
+
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
