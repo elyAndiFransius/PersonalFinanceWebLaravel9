@@ -13,13 +13,13 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('target', function (Blueprint $table) {
+        Schema::create('targets', function (Blueprint $table) {
             $table->id('id_target');
-            $table->string('target');
-            $table->integer('target_saldo');
-            $table->integer('saldo_sekarang');
-            $table->date('tanggal_mulai');
-            $table->date('tanggal_selesai');
+            $table->string('gol');
+            $table->integer('targetAmount');
+            $table->integer('currentAmount');
+            $table->date('startDate');
+            $table->date('endDate');
             $table->string('file');
             $table->timestamps();
         });

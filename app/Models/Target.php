@@ -9,13 +9,13 @@ class Target extends Model
 {
     use HasFactory;
 
-    protected $fillabel = [
-        'target',
-        'target_saldo',
-        'Saldo',
-        'tanggal_mulai',
-        'tanggal_selesai',
-        'file'
+    protected $fillable = [
+        'gol',
+        'targetAmount',
+        'currentAmount',
+        'startDate',
+        'endDate',
+        'file',
     ];
 
 }

@@ -30,7 +30,7 @@ class BudgetController extends Controller
                 'success' => false,
                 'message' => 'Yah, gagal membuat kategori!',
                 'data' => $validator->errors()
-            ]);
+            ], 422);
         }
 
         // Buat budget
@@ -42,10 +42,9 @@ class BudgetController extends Controller
         // Buat kategori-kategori yang terhubung ke budget ini
         foreach ($request->categories as $category)
         {
-            Category::create([
+            $budget->Categories()->create([
                 'name' => $category['name'],
                 'jumlah' => $category['jumlah'],
-                'budget_id' => $budget->id,
             ]);
         }
 

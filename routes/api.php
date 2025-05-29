@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\BudgetController;
+use App\Http\Controllers\API\TargetController;
 
 
 /*
@@ -23,6 +24,8 @@ Route::post('register', [AuthController::class, 'register']);
 Route::post('/validationKodeOTP', [AuthController::class, 'validationKodeOTP']);
 
 Route::post('/budgets', [BudgetController::class, 'create']);
+
+Route::post('/targets', [TargetController::class, 'store']);
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
