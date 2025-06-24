@@ -14,7 +14,10 @@ return new class extends Migration
     public function up()
     {
         Schema::create('targets', function (Blueprint $table) {
-            $table->id('id_target');
+            $table->id();
+            $table->unsignedBigInteger('user_id')->unique();
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+
             $table->string('gol');
             $table->integer('targetAmount');
             $table->integer('currentAmount');

@@ -23,10 +23,6 @@ Route::post('register', [AuthController::class, 'register']);
 
 Route::post('/validationKodeOTP', [AuthController::class, 'validationKodeOTP']);
 
-Route::post('/budgets', [BudgetController::class, 'create']);
-
-Route::post('/targets', [TargetController::class, 'store']);
-
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
@@ -40,4 +36,15 @@ Route::middleware('auth:sanctum')->get('/profile', function (Request $request) {
     ]);
 });
 
+
+Route::middleware('auth:sanctum')->group(function (){
+    Route::post('/targets/store', [TargetController::class, 'store']);
+    Route::get('/targets', [TargetController::class, 'index']);
+    Route::put('/targets/update', [TargetController::class, 'update']);
+});
+
+
+Route::middleware('auth:sanctum')->group(function (){
+    Route::post('/budgets', [BudgetController::class, 'create']);
+});
 

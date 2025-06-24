@@ -10,6 +10,7 @@ class Budget extends Model
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
         'pemasukkan',
         'priode',
     ];
@@ -18,4 +19,10 @@ class Budget extends Model
     {
         return $this->hasMany(Category::class);
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
 }

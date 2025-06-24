@@ -17,6 +17,9 @@ return new class extends Migration
         // Buat tabel budgets terlebih dahulu
         Schema::create('budgets', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('user_id')->unique();
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+
             $table->integer('pemasukkan');
             $table->enum('priode', ['harian', 'mingguan', 'bulanan', 'tahunan']);
             $table->timestamps();

@@ -10,6 +10,7 @@ class Target extends Model
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
         'gol',
         'targetAmount',
         'currentAmount',
@@ -17,5 +18,9 @@ class Target extends Model
         'endDate',
         'file',
     ];
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
 }

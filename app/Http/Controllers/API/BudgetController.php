@@ -17,6 +17,15 @@ class BudgetController extends Controller
 
     public function create(Request $request)
     {
+        // Check apakah user sudah pernah buat budget atau bekum
+        if(Budget::where('user_id', auth()->id())->exists()){
+            return response()->json([
+                'success' => false,
+                'message' => 'Kamu sudah memiliki Budget!',
+            ], 422);
+        };
+
+        // Ambil inputan user 
         $validator = Validator::make($request->all(), [
             'pemasukkan' => 'required|integer|min:0',
             'priode' => 'required|in:harian,mingguan,bulanan,tahunan',
@@ -35,6 +44,7 @@ class BudgetController extends Controller
 
         // Buat budget
         $budget = Budget::create([
+            'user_id' => auth()->id(),
             'pemasukkan' => $request->pemasukkan,
             'priode' => $request->priode
         ]);
