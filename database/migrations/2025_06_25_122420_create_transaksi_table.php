@@ -13,16 +13,16 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('targets', function (Blueprint $table) {
+        Schema::create('transaksi', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id')->unique();
+            $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->string('gol');
-            $table->integer('targetAmount');
-            $table->integer('currentAmount');
-            $table->date('startDate');
-            $table->date('endDate');
-            $table->string('file');
+            $table->unsignedBigInteger('categories_id');
+            $table->foreign('categories_id')->references('id')->on('categories')->onDelete('cascade');
+            $table->enum('jenis', ['pemasukkan', 'pengeluaran']);
+            $table->string('descripsi');
+            $table->integer('jumlah');
+            $table->string('date');
             $table->timestamps();
         });
     }
@@ -34,6 +34,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('target');
+        Schema::dropIfExists('transaksi');
     }
 };

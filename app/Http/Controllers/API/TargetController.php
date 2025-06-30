@@ -15,7 +15,7 @@ class TargetController extends Controller
     
     public function index (Request $request) {
 
-    $targets = Target::Where('user_id', auth()->id())->get();
+    $targets = Target::where('user_id', auth()->id())->get();
 
         foreach( $targets as $target ) {
             if($target->file){
