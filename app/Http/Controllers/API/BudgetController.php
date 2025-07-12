@@ -12,6 +12,17 @@ class BudgetController extends Controller
 {
     public function index(Request $request)
     {
+        // Untuk Mengambil budget data
+         
+        $budget = Budget::with('categories')
+                         ->where('user_id', auth()->id())
+                         ->get();
+
+        return response()->json([
+            'success' => true,
+            'message' => ' Berikut ini adalah data Budget',
+            'data' => $budget
+        ]);
 
     }
 
@@ -65,6 +76,101 @@ class BudgetController extends Controller
         ]);
     }
 
+    public function update(Request $request, Budget $budget)
+    {
+        $user = auth()->user();
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User tidak terautentikasi'
+            ], 401);
+        }
+
+        // Pastikan user milik budget yang login
+        if ($budget->user_id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Kamu tidak punya akses ke budget ini.'
+            ], 403);
+        }
+
+        // Validasi
+        $validator = Validator::make($request->all(), [
+            'pemasukkan' => 'sometimes|required|integer|min:0',
+            'priode' => 'sometimes|required|in:harian,mingguan,bulanan,tahunan',
+            'categories' => 'sometimes|required|array|min:1',
+            'categories.*.name' => 'sometimes|required|string|distinct',
+            'categories.*.jumlah' => 'sometimes|required|integer|min:0'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal',
+                'data' => $validator->errors()
+            ], 422);
+        }
+
+        // Update fields
+        if ($request->has('pemasukkan')) {
+            $budget->pemasukkan = $request->pemasukkan;
+        }
+
+        if ($request->has('priode')) {
+            $budget->priode = $request->priode;
+        }
+
+        $budget->save();
+
+        // Update kategori jika ada
+        if ($request->has('categories')) {
+            $budget->categories()->delete(); // hapus semua dulu
+
+            foreach ($request->categories as $category) {
+                $budget->categories()->create([
+                    'name' => $category['name'],
+                    'jumlah' => $category['jumlah']
+                ]);
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Budget telah berhasil diupdate',
+            'data' => $budget->load('categories')
+        ]);
+    }
+
+    public function destroy(Budget $budget)
+    {
+      
+        $user = auth()->user();
+
+
+        if(!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Pengguna tidak terdaftar'
+            ], 401);
+        }
+        // Pastikan user memiliki budget yang sedang login
+        if ($budget->user_id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Kamu tidak punya akses ke budget Ini.'
+            ], 403);
+        }
+
+        $budget->delete();
+         
+        return response()->json([
+            'success' => true,
+            'message' => 'Data dudgeting kamu berhasil di hapus'
+        ]);
+    }
+
+
 
     public function show(Budget $budget)
     {
@@ -74,17 +180,7 @@ class BudgetController extends Controller
 
     public function edit(Budget $budget)
     {
-        //
+        
     }
 
-
-    public function update(Request $request, Budget $budget)
-    {
-        //
-    }
-
-    public function destroy(Budget $budget)
-    {
-        //
-    }
 }

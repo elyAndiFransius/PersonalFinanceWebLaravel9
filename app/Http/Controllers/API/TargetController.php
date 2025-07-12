@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Validator;
 use App\Models\Target;
+use App\Models\deposit;
+
 
 
 
@@ -98,7 +100,7 @@ class TargetController extends Controller
             ], 401);
         }
 
-        // cari user yang sedang login 
+        // cari Target berdasarkan user yang sedang login 
         $target = Target::where('user_id', auth()->id())->first(); 
 
         // Mencari Target dari user
@@ -163,5 +165,73 @@ class TargetController extends Controller
             ]
         ]);
     }
-    
+
+    public function addprogress(Request $request)
+    {
+        $target = Target::where('user_id', auth()->id())->first();
+
+        if (!$target) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Target tidak ditemukan',
+            ], 404);
+        }
+
+        if ($target->currentAmount == $target->targetAmount) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Anda sudah mencapai target yang diinginkan',
+                'data' => [
+                    'Target Dana' => $target->targetAmount,
+                    'Dana Terkumpul' => $target->currentAmount
+                ]
+            ]);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'date' => 'required|date',
+            'deposit' => 'required|integer|min:0'
+        ]);
+
+        // check authentifikasi terlebih dahulu
+        $user = auth()->user();
+
+        if(!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda belum Login/ Token Expired'
+            ], 401);
+        }
+
+        // Menampilkan Error
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
+        \Log::info('Requst untuk masuk', $request->all());
+        $input = $request->except('user_id');
+        $input['user_id'] = auth()->id();
+
+
+        // Tambahkan dana dari inputan deposit ke target
+        $jumlahSekarang = $target->currentAmount + $request->deposit;
+        $target->currentAmount = $jumlahSekarang;
+        $target->save();
+
+
+        $deposit = deposit::create($input);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Ini adalah datanya',
+            'data' => [
+                'id' => $deposit->id,
+                'date' => $deposit->date,
+                'deposit' => $deposit->deposit
+        
+            ]
+        ]);
+    }
 }

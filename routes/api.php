@@ -37,21 +37,26 @@ Route::middleware('auth:sanctum')->get('/profile', function (Request $request) {
     ]);
 });
 
-
+// Target Routing
 Route::middleware('auth:sanctum')->group(function (){
     Route::post('/targets/store', [TargetController::class, 'store']);
     Route::get('/targets', [TargetController::class, 'index']); // di mobile juga belum di bisa
     Route::put('/targets/update', [TargetController::class, 'update']); // di mobile belum bisa
+    Route::post('/targets/addprogress', [TargetController::class, 'addprogress']); // di mobile belum bisa 
+
+});
+
+// Budget Routing
+Route::middleware('auth:sanctum')->group(function (){
+    Route::post('/budgets/create', [BudgetController::class, 'create']);
+    Route::get('/budgets', [BudgetController::class, 'index']);
+    Route::put('/budgets/update/{budget}', [BudgetController::class, 'update']); // di mobile belum bisa 
+    Route::delete('/budgets/delete/{budget}', [BudgetController::class, 'destroy']);
 });
 
 
 Route::middleware('auth:sanctum')->group(function (){
-    Route::post('/budgets', [BudgetController::class, 'create']);
-});
-
-
-Route::middleware('auth:sanctum')->group(function (){
-        Route::get('/transaksi/index', [TrasaksiController::class, 'index']);
-    Route::post('/transaksi', [TrasaksiController::class, 'store']);
+    Route::get('/transaksi', [TrasaksiController::class, 'index']);
+    Route::post('/transaksi/store   ', [TrasaksiController::class, 'store']);
 
 });

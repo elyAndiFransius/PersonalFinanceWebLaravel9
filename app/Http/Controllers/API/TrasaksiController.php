@@ -23,11 +23,7 @@ class TrasaksiController extends Controller
             'data' => $transaksi
         ]);
 
-
-
-
     }
-
 
     public function store(Request $request)
     {

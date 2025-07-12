@@ -50,6 +50,11 @@ class User extends Authenticatable
         return $this->hasOne(Target::class);
     }
 
+    public function deposit()
+    {
+        return $this->hasMany(deposit::class);
+    }
+
     public function budget()
     {
         return $this->hasOne(Budget::class);
