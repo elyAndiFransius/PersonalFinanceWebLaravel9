@@ -6,6 +6,8 @@ use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\BudgetController;
 use App\Http\Controllers\API\TargetController;
 use App\Http\Controllers\API\TrasaksiController;
+use App\Http\Controllers\API\CategoryController;
+use App\Http\Controllers\API\DepositController;
 
 
 /*
@@ -43,6 +45,7 @@ Route::middleware('auth:sanctum')->group(function (){
     Route::get('/targets', [TargetController::class, 'index']); // di mobile juga belum di bisa
     Route::put('/targets/update', [TargetController::class, 'update']); // di mobile belum bisa
     Route::post('/targets/addprogress', [TargetController::class, 'addprogress']); // di mobile belum bisa 
+    Route::delete('/targets/destory/{target}', [TargetController::class, 'destory']);
 
 });
 
@@ -57,6 +60,21 @@ Route::middleware('auth:sanctum')->group(function (){
 
 Route::middleware('auth:sanctum')->group(function (){
     Route::get('/transaksi', [TrasaksiController::class, 'index']);
-    Route::post('/transaksi/store   ', [TrasaksiController::class, 'store']);
+    Route::post('/transaksi/store', [TrasaksiController::class, 'store']);
+    Route::put('/transaksi/update/{transaksi}', [TrasaksiController::class, 'update']);
+    Route::delete('/transaksi/delete/{transaksi}', [TrasaksiController::class, 'destroy']);
 
+});
+
+Route::middleware('auth:sanctum')->group(function (){
+    Route::get('/categories', [CategoryController::class, 'index']);
+});
+
+
+// Deposit
+Route::middleware('auth:sanctum')->group(function (){
+    Route::get('/deposit', [DepositController::class, 'index']);
+    Route::post('/deposit/store', [DepositController::class, 'store']);
+    Route::put('/deposit/update/{deposit}', [DepositController::class, 'update']);
+    Route::delete('/deposit/delete/{deposit}', [DepositController::class, 'delete']);
 });

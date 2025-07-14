@@ -15,8 +15,8 @@ class BudgetController extends Controller
         // Untuk Mengambil budget data
          
         $budget = Budget::with('categories')
-                         ->where('user_id', auth()->id())
-                         ->get();
+            ->where('user_id', auth()->id())
+            ->get();
 
         return response()->json([
             'success' => true,
@@ -83,7 +83,7 @@ class BudgetController extends Controller
         if (!$user) {
             return response()->json([
                 'success' => false,
-                'message' => 'User tidak terautentikasi'
+                'message' => 'User tidak terautentifikasi'
             ], 401);
         }
 

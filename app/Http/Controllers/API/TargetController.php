@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Validator;
 use App\Models\Target;
 use App\Models\deposit;
+use Illuminate\Support\Arr;
 
 
 
@@ -37,7 +38,7 @@ class TargetController extends Controller
         // check apakah user sudah pernah buat Target atau belum
         if (Target::where('user_id', auth()->id())->exists()){
             return response()->json([
-                'succes' => false,
+                'success' => false,
                 'message' => 'Kamu sudah memiliki Target!',
             ], 422);
         };
@@ -61,18 +62,19 @@ class TargetController extends Controller
         } 
 
         // Buat Target
-        $input = $request->except('user_id');
-        $input['user_id'] = auth()->id();
+        $validated = $validator->validated();
+        $validated['user_id'] = auth()->id();
+
         
         if ($request->hasFile('file')) {
             $file = $request->file('file');
             $filename = time(). '_' . $file->getClientOriginalName();
             $file->storeAs('public/uploads', $filename);
-            $input['file'] = $filename;
+            $validated['file'] = $filename;
         }
 
 
-        $target = Target::create($input);
+        $target = Target::create($validated);
 
         return response()->json([
             'success' => true,
@@ -130,9 +132,15 @@ class TargetController extends Controller
             ], 422); // Change from 404 to 422
         }
 
+        $validated = $validator->validated();
+        \Log::info('Data tervalidasi:', $validated);
+        $target->fill(Arr::except($validated, ['file']));
+        \Log::info('Isi request:', $request->all());
+
+
         // Update file jika file ada
         if ($request->hasFile('file')) {
-            // Hapus file lama jika ada
+                // Hapus file lama jika ada
             if ($target->file && Storage::disk('public')->exists('uploads/' . $target->file)) {
                 Storage::disk('public')->delete('uploads/' . $target->file);
             }
@@ -145,7 +153,6 @@ class TargetController extends Controller
 
         // Update data lainnya jika data lainnya ada
         \Log::info('Request input untuk update:', $request->all());
-        $target->fill($request->except(['user_id', 'file']));
         $target->save();
 
         // Refresh model untuk memastikan data terbaru
@@ -166,72 +173,32 @@ class TargetController extends Controller
         ]);
     }
 
-    public function addprogress(Request $request)
+    public function destory(Target $target)
     {
-        $target = Target::where('user_id', auth()->id())->first();
-
-        if (!$target) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Target tidak ditemukan',
-            ], 404);
-        }
-
-        if ($target->currentAmount == $target->targetAmount) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Anda sudah mencapai target yang diinginkan',
-                'data' => [
-                    'Target Dana' => $target->targetAmount,
-                    'Dana Terkumpul' => $target->currentAmount
-                ]
-            ]);
-        }
-
-        $validator = Validator::make($request->all(), [
-            'date' => 'required|date',
-            'deposit' => 'required|integer|min:0'
-        ]);
-
-        // check authentifikasi terlebih dahulu
         $user = auth()->user();
 
-        if(!$user) {
+        // User tidak terdaftar
+        if (!$user) {
             return response()->json([
                 'success' => false,
-                'message' => 'Anda belum Login/ Token Expired'
+                'message' => 'Pengguna tidak terdaftar'
             ], 401);
         }
 
-        // Menampilkan Error
-        if ($validator->fails()) {
+        // pastikan user memilki target yang sedang login
+        if ($target->user_id !== $user->id) {
             return response()->json([
                 'success' => false,
-                'errors' => $validator->errors()
-            ], 422);
+                'messege' => 'Kamu tidak punya akses untuk target ini.'
+            ], 403);
         }
-        \Log::info('Requst untuk masuk', $request->all());
-        $input = $request->except('user_id');
-        $input['user_id'] = auth()->id();
 
-
-        // Tambahkan dana dari inputan deposit ke target
-        $jumlahSekarang = $target->currentAmount + $request->deposit;
-        $target->currentAmount = $jumlahSekarang;
-        $target->save();
-
-
-        $deposit = deposit::create($input);
+        $target->delete();
 
         return response()->json([
-            'success' => true,
-            'message' => 'Ini adalah datanya',
-            'data' => [
-                'id' => $deposit->id,
-                'date' => $deposit->date,
-                'deposit' => $deposit->deposit
-        
-            ]
+            'succes' => true,
+            'message' => 'Data target telah di hapus'
         ]);
+
     }
 }
