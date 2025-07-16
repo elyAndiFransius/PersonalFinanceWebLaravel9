@@ -107,6 +107,22 @@ class DepositController extends Controller
             ]);
         }
 
+        // check apakah target ditemukan
+        if (!$target) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Target dana tidak ditemukan untuk pengguna ini'
+            ], 404);
+        }
+
+        
+        if ($deposit->user_id !== $user->id) {
+            return response()->json([
+            'success' => false,
+            'message' => 'Kamu tidak punya akses ke transaksi ini'
+            ], 403);
+        }
+
        $validator = Validator::make($request->all(), [
             'date' => 'sometimes|required|date',
             'deposit' => 'sometimes|required|integer|min:0'
@@ -124,11 +140,14 @@ class DepositController extends Controller
         $validated = $validator->validated();
         $validated['user_id'] = auth()->id();
 
+        // Kurangi dulu nilai deposit lama dari target
+        $target->currentAmount -= $deposit->deposit;
+
         $deposit->update($validated);
 
 
-        // tambahkan dana ke target
-        $target->currentAmount += $validated['deposit'];
+        // Tambahkan nilai deposit baru ke target
+        $target->currentAmount += $deposit->deposit;
         $target->save();
 
 

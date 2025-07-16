@@ -20,6 +20,14 @@ class TargetController extends Controller
 
     $targets = Target::where('user_id', auth()->id())->get();
 
+    if ($targets->isEmpty()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Target anda belum ada',
+            
+        ]);
+    }
+
         foreach( $targets as $target ) {
             if($target->file){
                 $target->file=asset('storage/uploads/' .$target->file);

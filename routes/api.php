@@ -7,6 +7,7 @@ use App\Http\Controllers\API\BudgetController;
 use App\Http\Controllers\API\TargetController;
 use App\Http\Controllers\API\TrasaksiController;
 use App\Http\Controllers\API\CategoryController;
+use App\Http\Controllers\API\GrafikController;
 use App\Http\Controllers\API\DepositController;
 
 
@@ -77,4 +78,10 @@ Route::middleware('auth:sanctum')->group(function (){
     Route::post('/deposit/store', [DepositController::class, 'store']);
     Route::put('/deposit/update/{deposit}', [DepositController::class, 'update']);
     Route::delete('/deposit/delete/{deposit}', [DepositController::class, 'delete']);
+});
+
+// Grafik
+Route::middleware('auth:sanctum')->group(function (){
+    Route::get('/grafik', [GrafikController::class, 'index']);
+    
 });
