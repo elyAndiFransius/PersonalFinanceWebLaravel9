@@ -27,6 +27,12 @@ Route::post('register', [AuthController::class, 'register']);
 
 Route::post('/validationKodeOTP', [AuthController::class, 'validationKodeOTP']);
 
+Route::post('/forgot-password', [AuthController::class, 'verifyOtpForReset']);
+
+Route::post('/send-otp-for-reset', [AuthController::class, 'sendOtpForReset']);
+
+Route::post('/send-otp', [AuthController::class, 'sendOTP']);
+
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
@@ -82,6 +88,6 @@ Route::middleware('auth:sanctum')->group(function (){
 
 // Grafik
 Route::middleware('auth:sanctum')->group(function (){
-    Route::get('/grafik', [GrafikController::class, 'index']);
-    
+    Route::get('/grafik/kategori', [GrafikController::class, 'indexKategori']);
+    Route::get('/grafik/target', [GrafikController::class, 'indexTarget']);
 });

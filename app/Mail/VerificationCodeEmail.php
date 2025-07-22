@@ -15,11 +15,13 @@ class VerificationCodeEmail extends Mailable
     use Queueable, SerializesModels;
 
     public $user;
+    public $code;
 
 
-    public function __construct(User $user)
+    public function __construct(User $user, $code)
     {
        $this->user = $user; 
+       $this->code = $code;
     }
 
     public function build()
@@ -27,8 +29,9 @@ class VerificationCodeEmail extends Mailable
         return $this->subject(' Kode OTP Kamu ')
               ->view('emails.verification')
               ->with([
-                'code' => $this->user->token_code,
-                'name' => $this->user->name
+                'name' => $this->user->name,
+                'code' => $this->user->token_code
+                
               ]);
     }
 

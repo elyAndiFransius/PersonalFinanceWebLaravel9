@@ -27,7 +27,7 @@ return new class extends Migration
         // Buat tabel categories yang tergantung pada budgets
         Schema::create('categories', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique();
+            $table->string('name');
             $table->integer('jumlah');
             $table->foreignId('budget_id')->constrained('budgets')->onDelete('cascade');
             $table->timestamps();

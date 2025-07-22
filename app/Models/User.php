@@ -23,6 +23,10 @@ class User extends Authenticatable
         'password',
         'token_code',
         'verification',
+        'otp_attempts',
+        'last_failed_otp',
+        'otp_sent_add',
+        'otp_type'
     ];
 
     /**

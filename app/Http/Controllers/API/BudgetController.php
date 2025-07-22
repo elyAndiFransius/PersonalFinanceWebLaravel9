@@ -39,7 +39,7 @@ class BudgetController extends Controller
         // Ambil inputan user 
         $validator = Validator::make($request->all(), [
             'pemasukkan' => 'required|integer|min:0',
-            'priode' => 'required|in:harian,mingguan,bulanan,tahunan',
+            'priode' => 'required|in:Harian,Mingguan,Bulanan,Tahunan',
             'categories' => 'required|array|min:1',
             'categories.*.name' => 'required|string|distinct',
             'categories.*.jumlah' => 'required|integer|min:0',
@@ -98,7 +98,7 @@ class BudgetController extends Controller
         // Validasi
         $validator = Validator::make($request->all(), [
             'pemasukkan' => 'sometimes|required|integer|min:0',
-            'priode' => 'sometimes|required|in:harian,mingguan,bulanan,tahunan',
+            'priode' => 'sometimes|required|in:Harian,Mingguan,Bulanan,Tahunan',
             'categories' => 'sometimes|required|array|min:1',
             'categories.*.name' => 'sometimes|required|string|distinct',
             'categories.*.jumlah' => 'sometimes|required|integer|min:0'
@@ -123,15 +123,21 @@ class BudgetController extends Controller
 
         $budget->save();
 
-        // Update kategori jika ada
         if ($request->has('categories')) {
-            $budget->categories()->delete(); // hapus semua dulu
+            $totalKategori = collect($request->categories)->sum('jumlah');
 
-            foreach ($request->categories as $category) {
-                $budget->categories()->create([
-                    'name' => $category['name'],
-                    'jumlah' => $category['jumlah']
-                ]);
+            // Gunakan pemasukkan dari request jika ada, atau dari budget lama
+            $pemasukkan = $request->has('pemasukkan') ? $request->pemasukkan : $budget->pemasukkan;
+
+            if ($totalKategori > $pemasukkan) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Total jumlah kategori tidak boleh melebihi pemasukkan.',
+                    'data' => [
+                        'total_kategori' => $totalKategori,
+                        'pemasukkan' => $pemasukkan
+                    ]
+                ], 422);
             }
         }
 
@@ -146,7 +152,6 @@ class BudgetController extends Controller
     {
       
         $user = auth()->user();
-
 
         if(!$user) {
             return response()->json([
