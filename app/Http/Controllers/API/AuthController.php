@@ -32,7 +32,7 @@ class AuthController extends Controller
                 'success' => false,
                 'message' => 'Register gagal',
                 'data' => $validator->errors()
-            ]);
+            ], 422);
         }
         $input = $request->all(); // Menampung semua data yang di inputkan oleh pengguna
         $input['password'] = bcrypt($input['password']); // Melakukan enkripsi data password
@@ -71,7 +71,7 @@ class AuthController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Akun belum diverifikasi. Periksa email untuk kode OTP.'
-            ], 403);
+            ], 401);
         }
 
         // Coba login
@@ -132,6 +132,13 @@ class AuthController extends Controller
                     ->where('token_code', $request->code_verification)
                     ->first();
 
+        if (!$user || $user->token_code !== $request->code_verification) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Kode OTP salah atau tidak ditemukan.'
+            ], 400);
+        }
+
         // Cek apakah user diblokir sementara
         if ($user->otp_attempts >= 5) {
             $lastAttempt = Carbon::parse($user->last_failed_otp);
@@ -154,7 +161,7 @@ class AuthController extends Controller
             return response()->json([
                 'success'  => false,
                 'message' => 'Kode otp sudah kedaluwarsa'
-            ], 403);
+            ], 401);
         }
 
         if (!$user) {
