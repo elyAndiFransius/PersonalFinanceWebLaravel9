@@ -176,12 +176,10 @@ class BudgetController extends Controller
     }
 
 
-
     public function show(Budget $budget)
     {
         //
     }
-
 
     public function edit(Budget $budget)
     {

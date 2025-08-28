@@ -72,7 +72,7 @@ class AuthController extends Controller
                 'success' => false,
                 'message' => 'Akun belum diverifikasi. Periksa email untuk kode OTP.'
             ], 401);
-        }
+        }       
 
         // Coba login
         if (!Auth::attempt($request->only('email', 'password'))) {
