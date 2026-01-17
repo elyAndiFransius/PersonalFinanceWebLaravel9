@@ -14,8 +14,8 @@ class AuthControllerTest extends TestCase
     use RefreshDatabase;
 
     // test register
-    /** @test */
-    public function register_fail_when_data_is_invalid()
+    /** @test ini ketika register gagal saat datanya salah  */
+    public function register_invalid()
     {
         $response = $this->postJson('/api/register', [
             'name' => '',
@@ -34,8 +34,8 @@ class AuthControllerTest extends TestCase
                     ]);
              
     }
-    /** @test */
-    public function register_successfully_create_user_and_sends_email()
+    /** @test ini untuk berhasil ketika datanya valid*/
+    public function register_valid()
     {
         // Arrange: Menonaktifkan pengiriman email secara nyata
         Mail::fake();
@@ -117,16 +117,16 @@ class AuthControllerTest extends TestCase
     // test sendOtpForReset
     /** @test */
     public function sendOtpForReset_fail_when_email_not_found(){
-        // Arrange: Pastikan tidak ada user
+        // Siapkan: Pastikan tidak ada user
         Mail::fake();
 
-        // Act: Kirim request OTP untuk email yang tidak ada
+        // Aksi: Kirim request OTP untuk email yang tidak ada
         $response = $this->postJson('/api/send-otp-for-reset', [
             'email' => 'tidakada@example.com',
             'password' => 'password123',
         ]);
 
-        // Assert: Respon 404 dan tidak mengirim email
+        // Verifikasi: Respon 404 dan tidak mengirim email
         $response->assertStatus(404)
                  ->assertJson([
                     'success' => false,
@@ -321,10 +321,8 @@ class AuthControllerTest extends TestCase
         $response->assertStatus(200)
                  ->assertJsonFragment([
                      'success' => true,
-                     'message' => 'Kode kamu berhasil di kirimkan ke emaail kamu'
+                     'message' => 'Kode kamu berhasil di kirimkan ke email kamu'
                  ]);
      }
-
-
 
 }

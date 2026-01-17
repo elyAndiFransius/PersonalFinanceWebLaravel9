@@ -23,9 +23,9 @@ class BudgetFactory extends Factory
             'pemasukkan' => $this->faker->numberBetween(100000, 1000000),
             'priode' => $this->faker->randomElement(['Harian', 'Mingguan', 'Bulanan']),
 
-            ];
-        }
-            // ⬇ Tambahkan fungsi configure di bawah definition()
+        ];
+    }
+    // Tambahkan fungsi configure di bawah definition()
     public function configure()
     {
         return $this->afterCreating(function ($budget) {

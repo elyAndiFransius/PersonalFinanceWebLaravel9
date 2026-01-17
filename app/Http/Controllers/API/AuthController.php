@@ -293,7 +293,7 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Kode kamu berhasil di kirimkan ke emaail kamu'
+            'message' => 'Kode kamu berhasil di kirimkan ke email kamu'
         ]);
     }
 

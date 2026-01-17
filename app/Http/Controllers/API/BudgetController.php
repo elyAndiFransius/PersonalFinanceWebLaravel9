@@ -10,20 +10,18 @@ use Validator;
 
 class BudgetController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
         // Untuk Mengambil budget data
-         
         $budget = Budget::with('categories')
             ->where('user_id', auth()->id())
             ->get();
 
         return response()->json([
             'success' => true,
-            'message' => ' Berikut ini adalah data Budget',
+            'message' => 'Berikut ini adalah data Budget',
             'data' => $budget
         ]);
-
     }
 
     public function create(Request $request)
@@ -48,7 +46,7 @@ class BudgetController extends Controller
         if($validator->fails()){
             return response()->json([
                 'success' => false,
-                'message' => 'Yah, gagal membuat kategori!',
+                'message' => 'Yah gagal, kategori kosong!',
                 'data' => $validator->errors()
             ], 422);
         }
@@ -87,7 +85,7 @@ class BudgetController extends Controller
             ], 401);
         }
 
-        // Pastikan user milik budget yang login
+        // Pastikan user milik budget yang dengan login
         if ($budget->user_id !== $user->id) {
             return response()->json([
                 'success' => false,
@@ -175,15 +173,5 @@ class BudgetController extends Controller
         ]);
     }
 
-
-    public function show(Budget $budget)
-    {
-        //
-    }
-
-    public function edit(Budget $budget)
-    {
-        
-    }
 
 }
