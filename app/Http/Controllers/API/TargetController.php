@@ -8,76 +8,74 @@ use Validator;
 use App\Models\Target;
 use App\Models\deposit;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Storage;
 
 
 
 
 class TargetController extends Controller
 {
+    public function index()
+    {
+        $targets = Target::where('user_id', auth()->id())->get();
 
-    
-    public function index (Request $request) {
+        if ($targets->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Target anda belum ada',
 
-    $targets = Target::where('user_id', auth()->id())->get();
+            ], 401);
+        }
 
-    if ($targets->isEmpty()) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Target anda belum ada',
-            
-        ]);
-    }
-
-        foreach( $targets as $target ) {
-            if($target->file){
-                $target->file=asset('storage/uploads/' .$target->file);
+        foreach ($targets as $target) {
+            if ($target->file) {
+                $target->file = asset('storage/uploads/' . $target->file);
             }
         }
         return response()->json([
             'success' => true,
             'message' => 'Daftar target Anda',
-            'data' =>$targets
+            'data' => $targets
         ]);
 
     }
-
-    public function store (Request $request)
+    public function store(Request $request)
     {
         // check apakah user sudah pernah buat Target atau belum
-        if (Target::where('user_id', auth()->id())->exists()){
+        if (Target::where('user_id', auth()->id())->exists()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Kamu sudah memiliki Target!',
             ], 422);
-        };
-
+        }
+        ;
 
         $validator = Validator::make($request->all(), [
-            'gol'=> 'required|string|distinct',
+            'gol' => 'required|string|distinct',
             'targetAmount' => 'required|integer|min:0',
             'currentAmount' => 'required|integer|min:0',
             'startDate' => 'required|date',
-            'endDate'=>  'required|date',
-            'file' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048' ,
+            'endDate' => 'required|date',
+            'file' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
         ]);
 
-        if($validator->fails()) {
+        if ($validator->fails()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Yah, gagal membuat kategori!',
                 'data' => $validator->errors()
             ], 422);
-        } 
+        }
 
         // Buat Target
         $validated = $validator->validated();
         $validated['user_id'] = auth()->id();
 
-        
+
         if ($request->hasFile('file')) {
             $file = $request->file('file');
-            $filename = time(). '_' . $file->getClientOriginalName();
-            $file->storeAs('public/uploads', $filename);
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->storeAs('uploads', $filename, 'public');
             $validated['file'] = $filename;
         }
 
@@ -90,12 +88,12 @@ class TargetController extends Controller
             'data' => [
                 'id' => $target->id,
                 'gol' => $target->gol,
-                'targetAmount' => $target->targetAmount, 
+                'targetAmount' => $target->targetAmount,
                 'currentAmount' => $target->currentAmount,
                 'startDate' => $target->startDate,
                 'endDate' => $target->endDate,
-                'file' => $target->file ? asset('storage/uploads' . $target->file ) : null
-            
+                'file' => $target->file ? asset('storage/uploads' . $target->file) : null
+
             ]
         ]);
     }
@@ -111,16 +109,16 @@ class TargetController extends Controller
         }
 
         // cari Target berdasarkan user yang sedang login 
-        $target = Target::where('user_id', auth()->id())->first(); 
+        $target = Target::where('user_id', auth()->id())->first();
 
         // Mencari Target dari user
-        if(!$target) {
+        if (!$target) {
             return response()->json([
                 'success' => false,
                 'message' => 'Anda Belum memiliki target'
             ], 404);
         }
-        
+
         // tampung inputan User
         $validator = Validator::make($request->all(), [
             'gol' => 'sometimes|required|string',
@@ -132,7 +130,7 @@ class TargetController extends Controller
         ]);
 
         // menampilkan error
-        if ($validator->fails()){
+        if ($validator->fails()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Validasi Gagal',
@@ -148,14 +146,14 @@ class TargetController extends Controller
 
         // Update file jika file ada
         if ($request->hasFile('file')) {
-                // Hapus file lama jika ada
+            // Hapus file lama jika ada
             if ($target->file && Storage::disk('public')->exists('uploads/' . $target->file)) {
                 Storage::disk('public')->delete('uploads/' . $target->file);
             }
-            
+
             $file = $request->file('file');
             $filename = time() . '_' . $file->getClientOriginalName();
-            $file->storeAs('public/uploads', $filename); // Fix: add 'public/'
+            $file->storeAs('uploads', $filename, 'public'); // Fix: add 'public/'
             $target->file = $filename;
         }
 
@@ -172,7 +170,7 @@ class TargetController extends Controller
             'data' => [
                 'id' => $target->id,
                 'gol' => $target->gol,
-                'targetAmount' => $target->targetAmount, 
+                'targetAmount' => $target->targetAmount,
                 'currentAmount' => $target->currentAmount,
                 'startDate' => $target->startDate,
                 'endDate' => $target->endDate,
@@ -180,7 +178,6 @@ class TargetController extends Controller
             ]
         ]);
     }
-
     public function destory(Target $target)
     {
         $user = auth()->user();

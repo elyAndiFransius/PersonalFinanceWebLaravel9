@@ -11,23 +11,28 @@ use Validator;
 class DepositController extends Controller
 {
 
-    public function index() 
+    public function index()
     {
         $deposit = Deposit::where('user_id', auth()->id())->get();
 
         return response()->json([
-            'success' => false,
+            'success' => true,
             'message' => 'Berikut ini adalah datanya',
             'data' => $deposit
         ]);
 
     }
 
-    public function store(Request $request) 
+    public function store(Request $request)
     {
-
-
         $target = Target::where('user_id', auth()->id())->first();
+
+        if (!$target) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Target tidak ditemukan',
+            ], 404);
+        }
 
         if ($target->currentAmount >= $target->targetAmount) {
             return response()->json([
@@ -40,13 +45,6 @@ class DepositController extends Controller
             ]);
         }
 
-        if (!$target) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Target tidak ditemukan',
-            ], 404);
-        }
-
         $validator = Validator::make($request->all(), [
             'date' => 'required|date',
             'deposit' => 'required|integer|min:0'
@@ -55,7 +53,7 @@ class DepositController extends Controller
         // check authentifikasi terlebih dahulu
         $user = auth()->user();
 
-        if(!$user) {
+        if (!$user) {
             return response()->json([
                 'success' => false,
                 'message' => 'Anda belum Login/ Token Expired'
@@ -70,9 +68,9 @@ class DepositController extends Controller
             ], 422);
         }
         \Log::info('Requst untuk masuk', $request->all());
-        $validated =  $validator->validated();
+        $validated = $validator->validated();
         $validated['user_id'] = auth()->id();
- 
+
         // Tambahkan dana dari inputan deposit ke target
         $jumlahSekarang = $target->currentAmount + $request->deposit;
         $target->currentAmount = $jumlahSekarang;
@@ -88,16 +86,15 @@ class DepositController extends Controller
                 'id' => $deposit->id,
                 'date' => $deposit->date,
                 'deposit' => $deposit->deposit
-        
+
             ]
         ]);
     }
 
-    public function update(Request $request, Deposit $deposit) 
+    public function update(Request $request, Deposit $deposit)
     {
         $user = auth()->user();
         $target = Target::where('user_id', auth()->id())->first();
-
 
         // check authentifikasi
         if (!$user) {
@@ -105,6 +102,14 @@ class DepositController extends Controller
                 'success' => false,
                 'message' => 'Pengguna tidak terdaftar'
             ]);
+        }
+
+
+        if ($deposit->user_id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Kamu tidak punya akses ke transaksi ini'
+            ], 403);
         }
 
         // check apakah target ditemukan
@@ -115,26 +120,18 @@ class DepositController extends Controller
             ], 404);
         }
 
-        
-        if ($deposit->user_id !== $user->id) {
-            return response()->json([
-            'success' => false,
-            'message' => 'Kamu tidak punya akses ke transaksi ini'
-            ], 403);
-        }
-
-       $validator = Validator::make($request->all(), [
+        $validator = Validator::make($request->all(), [
             'date' => 'sometimes|required|date',
             'deposit' => 'sometimes|required|integer|min:0'
-       ]);
+        ]);
 
-       // validasi inputan pengguna
-       if ($validator->fails()) {
+        // validasi inputan pengguna
+        if ($validator->fails()) {
             return response()->json([
                 'success' => false,
                 'errors' => $validator->errors()
-            ]);
-       }
+            ],422);
+        }
 
         \Log::info('Requst untuk masuk', $request->all());
         $validated = $validator->validated();
@@ -152,16 +149,16 @@ class DepositController extends Controller
 
 
         // check terget dan dana sekarang
-       if ($target->currentAmount >= $target->targetAmount) {
+        if ($target->currentAmount >= $target->targetAmount) {
             return response()->json([
-                'success'=> false,
+                'success' => false,
                 'message' => 'Anda sudah melebih target yang diinginkan',
                 'data' => [
                     'Target Dana' => $target->targetAmount,
                     'Dana Terkumpul' => $target->currentAmount
                 ]
             ]);
-       }
+        }
 
         return response()->json([
             'success' => true,
@@ -171,7 +168,7 @@ class DepositController extends Controller
 
     }
 
-    public function delete(Deposit $deposit) 
+    public function delete(Deposit $deposit)
     {
         $user = auth()->user();
         $target = Target::where('user_id', auth()->id())->first();
@@ -186,25 +183,24 @@ class DepositController extends Controller
 
         // pastikan user memiliki deposit
         if ($deposit->user_id !== $user->id) {
-            return  response()->json([
+            return response()->json([
                 'success' => false,
-                'message' => 'Kamu tidak punya akses untuk deposit ini'  
+                'message' => 'Kamu tidak punya akses untuk deposit ini'
             ], 404);
         }
 
         $deposit->delete();
 
         // tambahkan dana ke target
-        $target->currentAmount -=  $deposit->deposit;
+        $target->currentAmount -= $deposit->deposit;
         $target->save();
 
         return response()->json([
-            'seccess' => true,
+            'success' => true,
             'message' => 'Data deposit telah di hapus',
             'data' => $deposit
         ]);
 
     }
-
 
 }

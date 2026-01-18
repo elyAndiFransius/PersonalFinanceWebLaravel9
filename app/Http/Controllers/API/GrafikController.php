@@ -16,7 +16,7 @@ class GrafikController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Anda belum login'
-            ]);
+            ],401);
         }
 
         $budget = $user->budget()->with('categories')->first();
@@ -51,7 +51,7 @@ class GrafikController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Anda belum login'
-            ]);
+            ], 401);
         }
 
         $targets = Target::where('user_id', auth()->id())->get()->first();
@@ -60,7 +60,7 @@ class GrafikController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Target tidak di temukan'
-            ], 200);
+            ], 404);
         }
 
 
