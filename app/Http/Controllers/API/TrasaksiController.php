@@ -15,12 +15,18 @@ class TrasaksiController extends Controller
     {
         $transaksi = Transaksi::where('user_id', auth()->id())->get();
 
+        if ($transaksi->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Transaksi anda belum ada',
+
+            ], 401);
+        }
         return response()->json([
             'success' => true,
             'message' => 'Berikut ini adalah datanya',
             'data' => $transaksi
         ]);
-
     }
 
     public function store(Request $request)
@@ -115,7 +121,6 @@ class TrasaksiController extends Controller
 
 
     }
-
     public function update(Request $request, Transaksi $transaksi)
     {
         $user = auth()->user();
@@ -124,7 +129,7 @@ class TrasaksiController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'User tidak terautentifikasi'
-            ]);
+            ], 401);
         }
 
         if ($transaksi->user_id !== $user->id) {
@@ -148,7 +153,7 @@ class TrasaksiController extends Controller
                 'success' => false,
                 'message' => 'validasi gagal,',
                 'data' => $validator->errors()
-            ], );
+            ], 422);
         }
 
 
@@ -244,7 +249,7 @@ class TrasaksiController extends Controller
         $transaksi->delete();
 
         return response()->json([
-            'succes' => true,
+            'success' => true,
             'message' => 'Data target telah di hapus',
             'data' => $transaksi
         ]);

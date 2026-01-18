@@ -315,13 +315,24 @@ class DepositControllerTest extends TestCase
             'deposit' => 200000,
         ]);
 
-        $response = $this->actingAs($user)
-            ->deleteJson("/api/deposit/delete/{$deposit->id}");
-
-        $response->assertStatus(200)
+        $this->actingAs($user)
+            ->deleteJson("/api/deposit/delete/{$deposit->id}")
+            ->assertStatus(200)
             ->assertJson([
-                'seccess' => true,
+                'success' => true,
                 'message' => 'Data deposit telah di hapus',
+            ])
+            ->assertJsonStructure([
+                'success',
+                'message',
+                'data' => [
+                    'id',
+                    'user_id',
+                    'date',
+                    'deposit',
+                    'created_at',
+                    'updated_at',
+                ]
             ]);
 
         // deposit benar-benar terhapus
@@ -329,12 +340,13 @@ class DepositControllerTest extends TestCase
             'id' => $deposit->id,
         ]);
 
-        // 500000 - 200000 = 300000
+        // saldo target berkurang: 500000 - 200000 = 300000
         $this->assertDatabaseHas('targets', [
             'id' => $target->id,
             'currentAmount' => 300000,
         ]);
     }
+
 
     public function test_delete_deposit_forbidden_for_other_user()
     {
